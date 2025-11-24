@@ -36,16 +36,18 @@ The standard card format for all language learning is the **Language Learning** 
 ### Creating New Cards
 
 **Step 1: Generate audio**
+
 ```bash
 # Generate word audio and store in Anki
-python3 audio/tts/eleven-labs.py "word" -o audio/word.mp3 -a
+python3 scripts/tts/eleven-labs.py "word" -o audio/word.mp3 -a
 
 # Generate example sentence audio and store in Anki
-python3 audio/tts/eleven-labs.py "Example sentence here." -o audio/sentence.mp3 -a
+python3 scripts/tts/eleven-labs.py "Example sentence here." -o audio/sentence.mp3 -a
 ```
 
 **Step 2: Create card via AnkiConnect**
 Use the `addNote` action with the Language Learning model:
+
 ```json
 {
   "action": "addNote",
@@ -71,6 +73,7 @@ Use the `addNote` action with the Language Learning model:
 ### Card Templates
 
 Currently configured with 1 main template. Additional templates can be added for:
+
 - Audio-only practice (audio → translation)
 - Sentence practice (sentence → translation)
 - Reverse practice (native → learning language)
@@ -82,23 +85,24 @@ Audio generation uses the ElevenLabs Python SDK with a dedicated script.
 ## Setup
 
 ElevenLabs API key is stored in `.env`:
+
 ```bash
 ELEVENLABS_API_KEY=your-api-key-here
 ```
 
 ## Using the Script
 
-**File:** `audio/tts/eleven-labs.py`
+**File:** `scripts/tts/eleven-labs.py`
 
 ```bash
 # Generate audio only
-python3 audio/tts/eleven-labs.py "Text to convert" -o audio/filename.mp3
+python3 scripts/tts/eleven-labs.py "Text to convert" -o audio/filename.mp3
 
 # Generate AND automatically store in Anki (recommended)
-python3 audio/tts/eleven-labs.py "Text to convert" -o audio/filename.mp3 -a
+python3 scripts/tts/eleven-labs.py "Text to convert" -o audio/filename.mp3 -a
 
 # List available voices
-python3 audio/tts/eleven-labs.py --list-voices
+python3 scripts/tts/eleven-labs.py --list-voices
 ```
 
 ## Script Configuration
@@ -133,6 +137,3 @@ IMPORTANT: You should not expect the user to keep this up to date, you should ac
 
 - **Generalize related concepts into single cards**: Instead of creating separate cards for variations of the same concept (e.g., anh ấy, ông ấy, cô ấy, bà ấy, em ấy), create a single card using a placeholder like `<Pronoun>` with all variations listed in the translation field. This reduces deck clutter and helps users understand relationships between similar forms.
 - Example: Use `<Pronoun> ấy` with explanation "anh ấy = he | ông ấy = he (elder) | cô ấy = she..." instead of 5 separate cards
-
-## Lessons Completed
-- Lesson 1: Question patterns and vocabulary from Vietnamese tutor session (52 cards with audio)

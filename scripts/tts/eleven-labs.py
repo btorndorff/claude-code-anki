@@ -5,12 +5,12 @@ Generates audio files for Vietnamese language learning flashcards.
 """
 
 import argparse
-import base64
 import os
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
 from elevenlabs.client import ElevenLabs
+from lib import store_in_anki, sanitize_filename
 
 # Load environment variables from .env file
 env_path = Path(__file__).parent.parent.parent / ".env"
@@ -62,10 +62,8 @@ def generate_audio(text: str, voice: str = DEFAULT_VOICE, language_code: str = "
 
     # Generate filename if not provided
     if not output_file:
-        # Use sanitized text as filename
-        safe_text = "".join(c if c.isalnum() or c in (" ", "-") else "" for c in text[:30])
-        safe_text = safe_text.strip().replace(" ", "_")
-        output_file = f"output_{safe_text}_{voice}.mp3"
+        safe_text = sanitize_filename(text)
+        output_file = f"audio/{safe_text}.mp3"
 
     output_path = Path(output_file)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -90,62 +88,6 @@ def generate_audio(text: str, voice: str = DEFAULT_VOICE, language_code: str = "
 
     except Exception as e:
         print(f"Error generating audio: {e}")
-        sys.exit(1)
-
-
-def store_in_anki(audio_file: str):
-    """
-    Store audio file in Anki's media collection.
-
-    Args:
-        audio_file: Path to audio file to store
-    """
-    import json
-    import subprocess
-
-    audio_path = Path(audio_file)
-    if not audio_path.exists():
-        print(f"Error: Audio file not found: {audio_file}")
-        sys.exit(1)
-
-    # Read file and convert to base64
-    with open(audio_path, "rb") as f:
-        audio_data = base64.b64encode(f.read()).decode()
-
-    print(f"Storing {audio_path.name} in Anki...")
-
-    try:
-        response = subprocess.run(
-            [
-                "curl", "-X", "POST", "http://localhost:8765",
-                "-H", "Content-Type: application/json",
-                "-d", json.dumps({
-                    "action": "storeMediaFile",
-                    "version": 6,
-                    "params": {
-                        "filename": audio_path.name,
-                        "data": audio_data
-                    }
-                })
-            ],
-            capture_output=True,
-            text=True,
-            timeout=10
-        )
-
-        result = json.loads(response.stdout)
-        if result.get("error"):
-            print(f"Error: {result['error']}")
-            sys.exit(1)
-
-        print(f"✓ Stored in Anki: {result['result']}")
-        return result['result']
-
-    except json.JSONDecodeError:
-        print(f"Error: Invalid response from Anki. Is Anki running?")
-        sys.exit(1)
-    except subprocess.TimeoutExpired:
-        print("Error: Anki connection timeout. Is Anki running?")
         sys.exit(1)
 
 
