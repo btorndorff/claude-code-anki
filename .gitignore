@@ -6,6 +6,9 @@
 audio/*.mp3
 audio/output_*
 
+# Temporary files
+scripts/tmp/
+
 # Python
 __pycache__/
 *.py[cod]
