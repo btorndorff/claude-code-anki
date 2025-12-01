@@ -35,7 +35,3 @@ use the `scripts/create_card.ts` to create cards
 ## Important Notes
 
 - Audio filenames should be descriptive (e.g., `word.mp3`, `sentence.mp3`)
-
-# User Preferences
-
-Read `docs/USER_ANKI_PREFERENCES.md`
