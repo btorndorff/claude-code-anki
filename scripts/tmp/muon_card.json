@@ -1,0 +1,15 @@
+[
+  {
+    "deckName": "Vietnamese",
+    "modelName": "Language Learning",
+    "fields": {
+      "Learning Language": "mượn",
+      "Native Language": "to borrow",
+      "Example (Learning)": "Tôi mượn sách từ thư viện.",
+      "Example (Native)": "I borrow books from the library.",
+      "Audio Word": "[sound:mượn.mp3]",
+      "Audio Sentence": "[sound:Tôi_mượn_sách_từ_thư_viện.mp3]"
+    },
+    "tags": ["vocabulary"]
+  }
+]

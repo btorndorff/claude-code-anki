@@ -8,14 +8,78 @@ Usage:
 """
 
 import argparse
+import base64
 import json
 import sys
 import requests
+import re
 from pathlib import Path
 
 
 ANKI_URL = "http://localhost:8765"
 API_VERSION = 6
+
+
+def store_audio_file(filename):
+    """
+    Store an audio file in Anki's media collection.
+
+    Args:
+        filename: Path to audio file
+
+    Returns:
+        True if successful, False otherwise
+    """
+    audio_path = Path(filename)
+
+    if not audio_path.exists():
+        print(f"  ⚠ Audio file not found: {filename}")
+        return False
+
+    try:
+        with open(audio_path, "rb") as f:
+            audio_data = base64.b64encode(f.read()).decode()
+
+        payload = {
+            "action": "storeMediaFile",
+            "version": API_VERSION,
+            "params": {
+                "filename": audio_path.name,
+                "data": audio_data
+            }
+        }
+
+        response = requests.post(ANKI_URL, json=payload, timeout=10)
+        result = response.json()
+
+        if result.get("error"):
+            print(f"  ✗ Error storing {audio_path.name}: {result['error']}")
+            return False
+
+        return True
+    except Exception as e:
+        print(f"  ✗ Error storing {audio_path.name}: {e}")
+        return False
+
+
+def extract_audio_filenames(cards_data):
+    """
+    Extract all audio filenames from card fields.
+
+    Returns:
+        Set of unique audio filenames referenced in [sound:...] syntax
+    """
+    audio_files = set()
+    sound_pattern = r'\[sound:([^\]]+)\]'
+
+    for card in cards_data:
+        fields = card.get("fields", {})
+        for field_value in fields.values():
+            if isinstance(field_value, str):
+                matches = re.findall(sound_pattern, field_value)
+                audio_files.update(matches)
+
+    return audio_files
 
 
 def create_cards(cards_data):
@@ -114,6 +178,18 @@ Example cards.json format:
 
     print(f"Creating {len(cards_data)} card(s)...")
     print()
+
+    # Extract and store audio files first
+    audio_files = extract_audio_filenames(cards_data)
+    if audio_files:
+        print("Storing audio files...")
+        stored_count = 0
+        for audio_file in sorted(audio_files):
+            audio_path = Path("audio") / audio_file
+            if store_audio_file(audio_path):
+                stored_count += 1
+        print(f"✓ {stored_count}/{len(audio_files)} audio files stored")
+        print()
 
     created, failed = create_cards(cards_data)
 
