@@ -24,6 +24,20 @@ You (Claude Code) are responsible for helping manage Anki language learning deck
 
 ### Creating New Cards
 
+**Step 0: Check for duplicates**
+
+Before creating cards, check if any words already exist in the deck. For multiple words, check each one:
+
+```bash
+for word in "word1" "word2" "word3"; do
+  result=$(curl -s localhost:8765 -X POST -d "{\"action\": \"findNotes\", \"version\": 6, \"params\": {\"query\": \"deck:Vietnamese \\\"Learning Language:$word\\\"\"}}")
+  count=$(echo "$result" | python3 -c "import sys, json; print(len(json.load(sys.stdin)['result']))")
+  echo "$word: $count"
+done
+```
+
+If the count is non-zero, the card already exists. Skip duplicates and inform the user which words were skipped.
+
 **Step 1: Generate audio with ElevenLabs MCP**
 
 Use the ElevenLabs MCP `text_to_speech` tool:
@@ -45,31 +59,48 @@ for file in *.mp3; do
 done
 ```
 
-**Step 3: Create cards via AnkiConnect**
+**Step 3: Create cards via AnkiConnect (batch)**
 
-First, save card data to `vocab/cards.json` for reference. Then create cards via curl:
+Use `addNotes` (plural) to create all cards in a single request:
 
 ```bash
 curl localhost:8765 -X POST -d '{
-  "action": "addNote",
+  "action": "addNotes",
   "version": 6,
   "params": {
-    "note": {
-      "deckName": "Vietnamese",
-      "modelName": "Language Learning",
-      "fields": {
-        "Learning Language": "word",
-        "Native language": "translation",
-        "Example (Learning)": "Vietnamese sentence",
-        "Example (native)": "English sentence",
-        "Audio Word": "[sound:word.mp3]",
-        "Audio Sentence": "[sound:word_sentence.mp3]"
+    "notes": [
+      {
+        "deckName": "Vietnamese",
+        "modelName": "Language Learning",
+        "fields": {
+          "Learning Language": "word1",
+          "Native language": "translation1",
+          "Example (Learning)": "Vietnamese sentence 1",
+          "Example (native)": "English sentence 1",
+          "Audio Word": "[sound:word1.mp3]",
+          "Audio Sentence": "[sound:word1_sentence.mp3]"
+        },
+        "tags": ["vocabulary", "topic"]
       },
-      "tags": ["vocabulary", "topic"]
-    }
+      {
+        "deckName": "Vietnamese",
+        "modelName": "Language Learning",
+        "fields": {
+          "Learning Language": "word2",
+          "Native language": "translation2",
+          "Example (Learning)": "Vietnamese sentence 2",
+          "Example (native)": "English sentence 2",
+          "Audio Word": "[sound:word2.mp3]",
+          "Audio Sentence": "[sound:word2_sentence.mp3]"
+        },
+        "tags": ["vocabulary"]
+      }
+    ]
   }
 }'
 ```
+
+Returns an array of note IDs (or `null` for failures).
 
 **Step 4: Sync to AnkiWeb**
 
