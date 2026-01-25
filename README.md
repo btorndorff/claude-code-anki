@@ -6,17 +6,7 @@ Claude Code project framework for managing your Anki
 
 ### Installation
 
-1. **Clone and install dependencies:**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Configure API keys in `.env`:**
-
-- copy from `.env.example`
-
-3. **Start Anki**
+1. **Start Anki**
 
 - ensure you have installed Anki Desktop https://apps.ankiweb.net/#downloads
 
@@ -24,6 +14,6 @@ Claude Code project framework for managing your Anki
 
 - https://ankiweb.net/shared/info/2055492159
 
-5. **Update USER_ANKI_PREFERENCES.md**
+5. **Update CLAUDE.md With User Preferences**
 
 - update this doc with your use case for anki
