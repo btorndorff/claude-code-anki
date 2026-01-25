@@ -20,21 +20,71 @@ You (Claude Code) are responsible for helping manage Anki language learning deck
 - Always use version 5 in your requests
 - Check the `error` field in responses to handle failures gracefully
 - Anki must be running in the background for the API to work (if it is not you should ask the user to open it for you)
-- Read `docs/ANKI_CONNECT.md` for full documentation on how to use ankiconnect
+- use the anki-connect skill for full documentation on how to use ankiconnect
 
 ### Creating New Cards
 
-**Step 1: Generate audio**
+**Step 1: Generate audio with ElevenLabs MCP**
 
-use the audio scripts in `scripts/tts` to generate audio for the cards
+Use the ElevenLabs MCP `text_to_speech` tool:
+- Voice: Mai Thảo (ID: 558B1EcdabtcSdleer40)
+- Language: vi
+- Output directory: ./audio
 
-**Step 2: Create card via script**
+Then rename files to descriptive names:
+- Word: `word_name.mp3`
+- Sentence: `word_name_sentence.mp3`
 
-use the `scripts/create_card.ts` to create cards
+**Step 2: Store audio in Anki**
 
-## Important Notes
+```bash
+cd audio
+for file in *.mp3; do
+  base64_data=$(base64 -i "$file")
+  curl -s localhost:8765 -X POST -d "{\"action\": \"storeMediaFile\", \"version\": 6, \"params\": {\"filename\": \"$file\", \"data\": \"$base64_data\"}}"
+done
+```
 
-- Audio filenames should be descriptive (e.g., `word.mp3`, `sentence.mp3`)
+**Step 3: Create cards via AnkiConnect**
+
+First, save card data to `vocab/cards.json` for reference. Then create cards via curl:
+
+```bash
+curl localhost:8765 -X POST -d '{
+  "action": "addNote",
+  "version": 6,
+  "params": {
+    "note": {
+      "deckName": "Vietnamese",
+      "modelName": "Language Learning",
+      "fields": {
+        "Learning Language": "word",
+        "Native language": "translation",
+        "Example (Learning)": "Vietnamese sentence",
+        "Example (native)": "English sentence",
+        "Audio Word": "[sound:word.mp3]",
+        "Audio Sentence": "[sound:word_sentence.mp3]"
+      },
+      "tags": ["vocabulary", "topic"]
+    }
+  }
+}'
+```
+
+**Step 4: Sync to AnkiWeb**
+
+```bash
+curl localhost:8765 -X POST -d '{"action": "sync", "version": 6}'
+```
+
+**Step 5: Clean up**
+
+After syncing, delete the generated files:
+
+```bash
+rm audio/*.mp3
+rm vocab/*.json
+```
 
 # User Preferences & Information
 
