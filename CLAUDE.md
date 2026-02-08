@@ -1,5 +1,9 @@
 # CLAUDE.md
 
+# Current Anki State
+
+Current card: !`curl -s localhost:8765 -X POST -d '{"action": "guiCurrentCard", "version": 6}' 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); r=d.get('result'); print(f\"{r['fields']['Learning Language']['value']} = {r['fields']['Native language']['value']}\" if r else 'No card open')" 2>/dev/null || echo "Anki not running"`
+
 # Your Role
 
 You (Claude Code) are responsible for helping manage Anki language learning decks through the AnkiConnect API. The user has already installed AnkiConnect on their machine, and Anki must be running for you to interact with it.
@@ -44,6 +48,8 @@ Use the ElevenLabs MCP `text_to_speech` tool:
 - Voice: Mai Thảo (ID: 558B1EcdabtcSdleer40)
 - Language: vi
 - Output directory: ./audio
+- Stability: 0.75
+- Speed: 0.9
 
 Then rename files to descriptive names:
 - Word: `word_name.mp3`
@@ -123,7 +129,7 @@ This is a list of what this specific user is working on and cares about in relat
 
 IMPORTANT: You should not expect the user to keep this up to date, you should activley add to this in CLAUDE.md as the user mention preferences
 
-- The user is learning Vietnamese
+- The user is learning Vietnamese (Northern dialect) - use Northern vocabulary (e.g., ô tô not xe hơi, quả not trái)
 - the user is usually talking about their deck with the title "Vietnamese"
 - Uses ElevenLabs API for text-to-speech generation with Mai Thao voice
 - Prefers audio files saved to `./audio` folder before importing to Anki
