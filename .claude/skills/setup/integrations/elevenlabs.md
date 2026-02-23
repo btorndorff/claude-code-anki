@@ -12,36 +12,68 @@ When enabled, the card creation workflow will:
 
 ## Prerequisites
 
-- An [ElevenLabs](https://elevenlabs.io) account (free tier works for limited usage)
-- The ElevenLabs MCP server added to Claude Code
+- An [ElevenLabs](https://elevenlabs.io) account (free tier gives 10k credits/month)
+- `uv` installed (provides `uvx` for running the MCP server)
 
 ## Setup Steps
 
 ### 1. Check if ElevenLabs MCP is already configured
 
-Check if the ElevenLabs MCP server has already been set up in Claude Code.
+Use `ToolSearch` to check if any `elevenlabs` tools are available. If tools are found, the MCP server is already configured — skip to **Voice Selection**.
 
-**If not configured**, guide them:
+**If not configured**, walk the user through these steps:
 
-- Offical ElevenLabs MCP Read Me: https://github.com/elevenlabs/elevenlabs-mcp/blob/main/README.md
-- Get your API key from https://elevenlabs.io/app/settings/api-keys. There is a free tier with 10k credits per month.
-- Let them know they can finish this setup later and re-run `/setup` to configure audio
+#### a. Install uv (if not already installed)
 
-**If already configured**, proceed to voice selection.
+Check if `uvx` is available:
+
+```bash
+which uvx
+```
+
+If not found, install it:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+> **Note:** `uv` is a fast Python package runner. `uvx` (included with `uv`) lets Claude Code run the ElevenLabs MCP server without any global pip installs. This is NOT the same as installing the ElevenLabs MCP in Claude Desktop — that config is separate and not needed here.
+
+#### b. Get an ElevenLabs API key
+
+Direct the user to https://elevenlabs.io/app/settings/api-keys (free tier works).
+
+#### c. Add the MCP server to Claude Code
+
+Run this command (replacing the API key):
+
+```bash
+claude mcp add elevenlabs-mcp -s user -e ELEVENLABS_API_KEY=YOUR_API_KEY -- uvx elevenlabs-mcp
+```
+
+- `-s user` makes it available across all projects
+- `-e` passes the API key as an environment variable (not a CLI flag)
+- The `-- uvx elevenlabs-mcp` part tells Claude Code how to launch the server
+
+#### d. Restart Claude Code
+
+The user must exit and relaunch Claude Code for the new MCP server to connect. Then re-run `/setup` to continue configuration.
+
+Let the user know they can finish this later and re-run `/setup` at any point.
 
 ### 2. Voice Selection
 
 Ask the user:
 
 - **What voice would you like to use?** — They can browse voices at https://elevenlabs.io/app/voice-library
-- They should provide the voice url
+- They should provide the voice URL or name
 - If they're unsure, suggest they pick a native speaker voice for their target language
 
 ### 3. TTS Preferences
 
 Ask for (with suggested defaults):
 
-- **Language code** — e.g., `vi` for Vietnamese, `es` for Spanish, `ja` for Japanese, `ko` for Korean (should be derived from there target language in USER.md)
+- **Language code** — e.g., `vi` for Vietnamese, `es` for Spanish, `ja` for Japanese, `ko` for Korean (should be derived from their target language in USER.md)
 - **Speed** — suggest `0.9` (slightly slower is helpful for language learning)
 - **Stability** — suggest `0.75` (consistent pronunciation)
 
