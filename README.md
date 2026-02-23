@@ -11,8 +11,8 @@ A Claude Code project template for managing Anki language learning decks.
 ## Quick Start
 
 ```bash
-git clone https://github.com/btorndorff/claude-code-anki.git
-cd claude-code-anki
+git clone https://github.com/btorndorff/anki-language-learning-claude.git
+cd anki-language-learning-claude
 claude
 ```
 
