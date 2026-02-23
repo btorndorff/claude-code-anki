@@ -1,3 +1,6 @@
+# User-specific local settings
+.claude/settings.local.json
+
 # Environment variables
 .env
 .env.local
@@ -5,6 +8,9 @@
 # Audio files
 audio/*.mp3
 audio/output_*
+
+# Generated vocab files
+vocab/*.json
 
 # Temporary files
 scripts/tmp/

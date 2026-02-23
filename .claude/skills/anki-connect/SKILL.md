@@ -23,6 +23,10 @@ Available models: !`curl -s localhost:8765 -X POST -d '{"action": "modelNames", 
 
 If connection fails, user needs to start Anki application.
 
+## Workflows
+
+- [Card Creation Workflow](card-creation-workflow.md) — Step-by-step process for creating new flashcards (duplicate check, audio, create, sync, cleanup)
+
 ## API Request Format
 
 All requests are HTTP POST with JSON body:

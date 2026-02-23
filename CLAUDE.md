@@ -2,11 +2,11 @@
 
 # Current Anki State
 
-Current card: !`curl -s localhost:8765 -X POST -d '{"action": "guiCurrentCard", "version": 6}' 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); r=d.get('result'); print(f\"{r['fields']['Learning Language']['value']} = {r['fields']['Native language']['value']}\" if r else 'No card open')" 2>/dev/null || echo "Anki not running"`
+Current card: !`curl -s localhost:8765 -X POST -d '{"action": "guiCurrentCard", "version": 6}' 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); r=d.get('result'); fields=r.get('fields',{}) if r else {}; parts=[f'{k}={v[\"value\"]}' for k,v in fields.items() if v.get('value')]; print(' | '.join(parts) if parts else 'No card open')" 2>/dev/null || echo "Anki not running"`
 
 # Your Role
 
-You (Claude Code) are responsible for helping manage Anki language learning decks through the AnkiConnect API. The user has already installed AnkiConnect on their machine, and Anki must be running for you to interact with it.
+You (Claude Code) are responsible for helping manage Anki language learning decks through the AnkiConnect API. The user must already have installed AnkiConnect on their machine, and Anki must be running for you to interact with it.
 
 **Your responsibilities include:**
 
@@ -15,150 +15,17 @@ You (Claude Code) are responsible for helping manage Anki language learning deck
 - Adding relevant tags for categorization (e.g., difficulty level, topic, source)
 - Updating existing cards with corrections, additional context, or improved translations
 - Querying and analyzing deck contents to help the user review their progress
-- Managing audio files for pronunciation (especially for language learning)
+- Managing audio files for pronunciation (if audio is configured)
 - Bulk operations for efficient deck management
 
-# Interacting with
+**IMPORTANT:** All user-specific configuration (target language, deck name, card model, audio settings, preferences) is stored in USER.md. Always read USER.md to understand the user's setup before performing operations. If USER.md is not configured, prompt the user to run `/setup`.
+
+# Interacting with AnkiConnect
 
 - All API calls are HTTP POST requests to `http://localhost:8765`
-- Always use version 5 in your requests
+- Always use version 6 in your requests
 - Check the `error` field in responses to handle failures gracefully
 - Anki must be running in the background for the API to work (if it is not you should ask the user to open it for you)
-- use the anki-connect skill for full documentation on how to use ankiconnect
+- Use the anki-connect skill for full documentation on how to use AnkiConnect and for common anki workflows
 
-### Creating New Cards
-
-**Step 0: Check for duplicates**
-
-Before creating cards, check if any words already exist in the deck. For multiple words, check each one:
-
-```bash
-for word in "word1" "word2" "word3"; do
-  result=$(curl -s localhost:8765 -X POST -d "{\"action\": \"findNotes\", \"version\": 6, \"params\": {\"query\": \"deck:Vietnamese \\\"Learning Language:$word\\\"\"}}")
-  count=$(echo "$result" | python3 -c "import sys, json; print(len(json.load(sys.stdin)['result']))")
-  echo "$word: $count"
-done
-```
-
-If the count is non-zero, the card already exists. Skip duplicates and inform the user which words were skipped.
-
-**Step 1: Generate audio with ElevenLabs MCP**
-
-Use the ElevenLabs MCP `text_to_speech` tool:
-- Voice: Mai Thảo (ID: 558B1EcdabtcSdleer40)
-- Language: vi
-- Output directory: ./audio
-- Stability: 0.75
-- Speed: 0.9
-
-Then rename files to descriptive names:
-- Word: `word_name.mp3`
-- Sentence: `word_name_sentence.mp3`
-
-**Step 2: Store audio in Anki**
-
-```bash
-cd audio
-for file in *.mp3; do
-  base64_data=$(base64 -i "$file")
-  curl -s localhost:8765 -X POST -d "{\"action\": \"storeMediaFile\", \"version\": 6, \"params\": {\"filename\": \"$file\", \"data\": \"$base64_data\"}}"
-done
-```
-
-**Step 3: Create cards via AnkiConnect (batch)**
-
-Use `addNotes` (plural) to create all cards in a single request:
-
-```bash
-curl localhost:8765 -X POST -d '{
-  "action": "addNotes",
-  "version": 6,
-  "params": {
-    "notes": [
-      {
-        "deckName": "Vietnamese",
-        "modelName": "Language Learning",
-        "fields": {
-          "Learning Language": "word1",
-          "Native language": "translation1",
-          "Example (Learning)": "Vietnamese sentence 1",
-          "Example (native)": "English sentence 1",
-          "Audio Word": "[sound:word1.mp3]",
-          "Audio Sentence": "[sound:word1_sentence.mp3]"
-        },
-        "tags": ["vocabulary", "topic"]
-      },
-      {
-        "deckName": "Vietnamese",
-        "modelName": "Language Learning",
-        "fields": {
-          "Learning Language": "word2",
-          "Native language": "translation2",
-          "Example (Learning)": "Vietnamese sentence 2",
-          "Example (native)": "English sentence 2",
-          "Audio Word": "[sound:word2.mp3]",
-          "Audio Sentence": "[sound:word2_sentence.mp3]"
-        },
-        "tags": ["vocabulary"]
-      }
-    ]
-  }
-}'
-```
-
-Returns an array of note IDs (or `null` for failures).
-
-**Step 4: Sync to AnkiWeb**
-
-```bash
-curl localhost:8765 -X POST -d '{"action": "sync", "version": 6}'
-```
-
-**Step 5: Clean up**
-
-After syncing, delete the generated files:
-
-```bash
-rm audio/*.mp3
-rm vocab/*.json
-```
-
-# User Preferences & Information
-
-This is a list of what this specific user is working on and cares about in relation to anki and your work managing.
-
-IMPORTANT: You should not expect the user to keep this up to date, you should activley add to this in CLAUDE.md as the user mention preferences
-
-- The user is learning Vietnamese (Northern dialect) - use Northern vocabulary (e.g., ô tô not xe hơi, quả not trái)
-- the user is usually talking about their deck with the title "Vietnamese"
-- Uses ElevenLabs API for text-to-speech generation with Mai Thao voice
-- Prefers audio files saved to `./audio` folder before importing to Anki
-- Uses custom "Language Learning" model with 6 fields for all vocabulary cards
-- Audio is stored in dedicated fields (`Audio Word` and `Audio Sentence`), NOT embedded in text fields
-- Currently has 1 main card template; may expand to 4 templates (word, audio, sentence, reverse) in future
-- Uses flexible tagging system for card organization (categories, topics, difficulty, source, etc.)
-- Example tags used: `questions`, `grammar`, `dialog-vocab`, `listening-vocab`, `pronouns`, `vocabulary`
-
-## Card Creation Best Practices
-
-- **Generalize related concepts into single cards**: Instead of creating separate cards for variations of the same concept (e.g., anh ấy, ông ấy, cô ấy, bà ấy, em ấy), create a single card using a placeholder like `<Pronoun>` with all variations listed in the translation field. This reduces deck clutter and helps users understand relationships between similar forms.
-- Example: Use `<Pronoun> ấy` with explanation "anh ấy = he | ông ấy = he (elder) | cô ấy = she..." instead of 5 separate cards
-
-# Flashcard Format: Language Learning Model
-
-The standard card format for all language learning is the **Language Learning** model with 6 fields:
-
-1. **Learning Language** - Word/phrase in target language
-2. **Native Language** - Translation in native language
-3. **Example (Learning)** - Example sentence in target language
-4. **Example (Native)** - Example sentence in native language
-5. **Audio Word** - Audio file for the word (e.g., `[sound:filename.mp3]`)
-6. **Audio Sentence** - Audio file for the example sentence (e.g., `[sound:filename.mp3]`)
-
-# Card Templates
-
-Currently configured with 1 main template. Additional templates can be added for:
-
-- Audio-only practice (audio → translation)
-- Sentence practice (sentence → translation)
-- Reverse practice (native → learning language)
+@USER.md

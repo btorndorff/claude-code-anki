@@ -7,9 +7,9 @@ try:
     d = json.load(sys.stdin)
     r = d.get('result')
     if r:
-        word = r['fields']['Learning Language']['value']
-        meaning = r['fields']['Native language']['value']
-        print(f'Current Anki card: {word} = {meaning}')
+        fields = r.get('fields', {})
+        parts = [f'{k}: {v[\"value\"]}' for k, v in fields.items() if v.get('value')]
+        print('Current Anki card: ' + ' | '.join(parts) if parts else 'Card has no content')
     else:
         print('No Anki card open')
 except:
