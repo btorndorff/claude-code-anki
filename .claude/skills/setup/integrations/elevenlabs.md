@@ -91,7 +91,7 @@ When this integration is configured, update the Audio Configuration section of U
   - Language code: [code]
   - Speed: [value]
   - Stability: [value]
-  - Output directory: ./audio
+  - Output directory: ./audio (within repo)
 ```
 
 ## How Audio Works in the Card Creation Workflow
