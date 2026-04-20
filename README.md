@@ -1,69 +1,113 @@
 # Claude Code Anki
 
-A Claude Code project template for managing Anki language learning decks.
+**Talk to Claude. Get flashcards.** A conversational companion for Anki, built for language learners.
 
-## Prerequisites
+<!-- TODO: record a 20–30s screen capture of adding cards by conversation and drop it here as demo.gif -->
+<!-- ![Demo: adding five Spanish words by chat](docs/demo.gif) -->
 
-1. [Anki Desktop](https://apps.ankiweb.net/#downloads)
-2. [AnkiConnect](https://ankiweb.net/shared/info/2055492159) plugin (addon code: `2055492159`)
-3. [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
+## See it work
 
-## Quick Start
+```
+You:    Add hola, gracias, and buenos días with example sentences.
+
+Claude: Creating three cards in your Spanish deck…
+         • hola — "Hola, ¿cómo estás?" / "Hello, how are you?"
+         • gracias — "Muchas gracias por tu ayuda." / "Thanks a lot for your help."
+         • buenos días — "Buenos días, señora." / "Good morning, ma'am."
+        Audio generated for all three. Added to Anki. ✓
+
+You:    Tag those as "greetings" and add a couple more: de nada, por favor.
+
+Claude: Done. Five cards tagged "greetings".
+```
+
+That's the whole loop. No forms, no field-by-field entry. You talk, Claude handles Anki.
+
+## Install — one paste
+
+Have [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and [Anki](https://apps.ankiweb.net/) installed? Open Claude Code and paste this:
+
+> Clone `https://github.com/btorndorff/anki-language-learning-claude.git` into `~/anki-learning`, open it, and run `/setup`.
+
+Claude will do the rest — including walking you through installing the AnkiConnect add-on if you don't have it yet.
+
+**Prefer to run it yourself?**
 
 ```bash
-git clone https://github.com/btorndorff/anki-language-learning-claude.git
-cd anki-language-learning-claude
+git clone https://github.com/btorndorff/anki-language-learning-claude.git ~/anki-learning
+cd ~/anki-learning
 claude
 ```
 
-Then run `/setup` inside Claude Code. The wizard will:
+Then inside Claude Code, run `/setup`.
 
-1. Verify Anki and AnkiConnect are running
-2. Ask about your target language and preferences
-3. Create your deck and card model (or connect to an existing one)
-4. Optionally configure audio pronunciation (ElevenLabs)
-5. Save everything to `USER.md`
+## What you can say to Claude
 
-After setup, just start talking to Claude:
+Once setup is done, talk to Claude in plain English. A few examples:
 
-- "Add these words: hello, goodbye, thank you"
-- "Create cards from this vocabulary list"
-- "Show me my deck stats"
-- "Tag all cards added today as 'lesson-5'"
-- "Suspend all my cards about weather"
+- "Add these words: *hola, gracias, de nada*."
+- "Create cards from this list I pasted from my textbook."
+- "Make a card for *levantarse* with example sentences about a morning routine."
+- "Tag all cards I added today as `lesson-5`."
+- "Suspend my cards about weather vocabulary."
+- "How many cards are in my Spanish deck? What's my review load this week?"
+- "Fix the translation on the card that's currently open in Anki — it should be 'to get up,' not 'to raise.'"
 
-## What's Included
+Claude can see the card you're reviewing in Anki and edit it in place. No copy-paste required.
+
+## Prerequisites (if you don't have them yet)
+
+1. **Anki Desktop** — https://apps.ankiweb.net/#downloads
+2. **AnkiConnect add-on** — in Anki: *Tools → Add-ons → Get Add-ons → paste code `2055492159` → Restart Anki*
+3. **Claude Code** — https://docs.anthropic.com/en/docs/claude-code
+
+Don't worry about getting AnkiConnect right now — `/setup` will check for it and walk you through if it's missing.
+
+## Making it yours
+
+This is a **template**, not a black box. Everything Claude knows about your setup lives in plain Markdown files you can read and edit:
+
+- **`USER.md`** — your target language, deck name, field mappings, and card-creation preferences. Claude updates this automatically as you mention new preferences, but you can also edit it directly.
+- **`CLAUDE.md`** — how Claude approaches Anki. Add your own rules here (e.g., "always include IPA pronunciation," "prefer shorter example sentences").
+- **`.claude/settings.json`** — which shell commands Claude is allowed to run without asking. For personal tweaks that shouldn't be shared, use `.claude/settings.local.json` — it's gitignored.
+
+Re-run `/setup` any time to reconfigure, add an integration, or run a health check if something seems off.
+
+## Optional: audio pronunciation
+
+If you'd like native-speaker audio on every card, `/setup` can configure [ElevenLabs](https://elevenlabs.io) (free tier works). You can skip this during setup and add it later — just run `/setup` again.
+
+## What's included
 
 ```
-├── CLAUDE.md                          # Framework instructions for Claude
-├── USER.md                            # Your preferences
-├── README.md                          # This file
+├── README.md                         # You are here
+├── CLAUDE.md                         # How Claude approaches Anki
+├── USER.md                           # Your language + deck preferences
 ├── .claude/
-│   ├── settings.json                  # Permissions & hooks
-│   ├── hooks/
-│   │   └── current-card.sh            # Injects current card into context
+│   ├── settings.json                 # Permissions + hooks
+│   ├── hooks/current-card.sh         # Lets Claude see the card you're reviewing
 │   └── skills/
-│       ├── anki-connect/              # How to interact with anki via anki connect
-│       └── setup/                     # first time setup and integration setup
+│       ├── setup/                    # The /setup wizard (and its diagnostics)
+│       └── anki-connect/             # How Claude talks to AnkiConnect
 └── .gitignore
 ```
 
-## Available Commands
+## Available commands
 
-| Command         | Description                                                       |
-| --------------- | ----------------------------------------------------------------- |
-| `/setup`        | First-time configuration and integration setup                    |
-| `/anki-connect` | Interact with Anki (create cards, query decks, manage tags, etc.) |
+| Command         | What it does                                                                  |
+| --------------- | ----------------------------------------------------------------------------- |
+| `/setup`        | First-time setup. Run again later to add integrations, reconfigure, or diagnose issues. |
+| `/anki-connect` | Open Claude's reference for the AnkiConnect API (usually invoked automatically). |
 
-## Customization
+## Troubleshooting
 
-Your preferences live in `USER.md`. Claude updates this file automatically as you mention preferences. You can also edit it directly or re-run `/setup` to reconfigure.
-
-For personal Claude Code settings that shouldn't be shared (API keys, local overrides), create `.claude/settings.local.json` — it's gitignored.
+- **"Claude can't connect to Anki."** Make sure Anki Desktop is actually running and AnkiConnect is installed. Run `/setup` and pick **Diagnose** — it will tell you exactly what's wrong.
+- **Cards aren't landing in the right deck.** Your deck or card-model name in `USER.md` may have drifted from Anki. Re-run `/setup` → **Diagnose**, or edit `USER.md` directly.
+- **Audio isn't working.** Re-run `/setup` and pick ElevenLabs. Make sure you restarted Claude Code after adding the MCP server.
 
 ## Contributing
 
-Contributions welcome! Feel free to open issues or PRs to improve the template.
+Issues and PRs welcome. This is designed to be forked — if you build a nicer version for your own language or study style, share it.
 
 ## License
 
