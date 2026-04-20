@@ -36,10 +36,10 @@ Claude will do the rest — including walking you through installing the AnkiCon
 ```bash
 git clone https://github.com/btorndorff/anki-language-learning-claude.git ~/anki-learning
 cd ~/anki-learning
-claude
+claude "/setup"
 ```
 
-Then inside Claude Code, run `/setup`.
+`claude "/setup"` opens Claude Code and runs the setup wizard in one step.
 
 ## What you can say to Claude
 
