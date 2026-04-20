@@ -18,11 +18,7 @@ If a check fails 3 times in a row with the same error, offer to pause setup — 
 
 **Fix:**
 
-> You'll need Anki Desktop first (it's free).
->
-> - **macOS:** `brew install --cask anki` — or download from https://apps.ankiweb.net/#downloads
-> - **Windows:** https://apps.ankiweb.net/#downloads — download the installer and run it.
-> - **Linux:** https://apps.ankiweb.net/#downloads — or your package manager if it has a recent version.
+> You'll need Anki Desktop first (it's free). Download the installer for your OS here: https://apps.ankiweb.net/#downloads
 >
 > Reply when you've installed and opened it.
 
