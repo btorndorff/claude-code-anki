@@ -2,9 +2,6 @@
 
 **Talk to Claude. Get flashcards.** A conversational companion for Anki, built for language learners.
 
-<!-- TODO: record a 20–30s screen capture of adding cards by conversation and drop it here as demo.gif -->
-<!-- ![Demo: adding five Spanish words by chat](docs/demo.gif) -->
-
 ## See it work
 
 ```
